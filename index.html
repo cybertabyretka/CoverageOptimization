@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модель оптимизации покрытия точек</title>
+    <title>Model of Coverage Optimization</title>
     <style>
         :root {
             --bg: #f8f9fa;
@@ -111,8 +111,8 @@
 <body>
 
 <header>
-    <h1>Визуализация модели покрытия</h1>
-    <a href="https://github.com/cybertabyretka/CoverageOptimization" target="_blank">Исходный код ↗</a>
+    <h1>Visualization of Coverage Optimization Model</h1>
+    <a href="https://github.com/cybertabyretka/CoverageOptimization" target="_blank">Source Code ↗</a>
 </header>
 
 <div class="main">
@@ -125,50 +125,65 @@
                 <span>0.5</span>
                 <span>1.0</span>
             </div>
-            <div style="margin-top:4px; color:#555;">Значение индикатора S(x,y)</div>
+            <div style="margin-top:4px; color:#555;">Value of Indicator</div>
         </div>
     </div>
 
     <div class="controls">
         <div class="control-group">
-            <div class="group-title">Геометрия и ориентация</div>
-            <div class="param-row"><label>x₀ (начало)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label>y₀ (начало)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label>θ (угол, рад)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6"><span class="param-val">0.60</span></div>
-            <div class="param-row"><label>L (длина вектора)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0"><span class="param-val">5.0</span></div>
-            <div class="param-row"><label>W (ширина области)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0"><span class="param-val">2.0</span></div>
+            <div class="group-title">Geometry and Orientation</div>
+            <div class="param-row"><label>x₀ (start)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+            <div class="param-row"><label>y₀ (start)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+            <div class="param-row"><label>θ (angle, rad)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6"><span class="param-val">0.60</span></div>
+            <div class="param-row"><label>L (vector length)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0"><span class="param-val">5.0</span></div>
+            <div class="param-row"><label>W (width of the area)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0"><span class="param-val">2.0</span></div>
         </div>
 
         <div class="control-group">
-            <div class="group-title">Резкость границ (k)</div>
-            <div class="param-row"><label>k₁ (старт)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₂ (конец)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₃ (лево)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₄ (право)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            <div class="group-title">Edge Sharpness (k)</div>
+            <div class="param-row"><label>k₁ (start)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label>k₂ (end)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label>k₃ (left)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label>k₄ (right)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
         </div>
 
         <div class="control-group">
-            <div class="group-title">Степени искажения (p)</div>
-            <div class="param-row"><label>p₁ (старт)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₂ (конец)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₃ (лево)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₄ (право)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            <div class="group-title">Degrees of Distortion (p)</div>
+            <div class="param-row"><label>p₁ (start)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label>p₂ (end)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label>p₃ (left)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label>p₄ (right)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Конфигурация и состояние ---
+    // Configuration and constants
     const canvas = document.getElementById('heatmap');
     const ctx = canvas.getContext('2d');
     const width = 600, height = 600;
     const res = 300;
-    const scale = width / res;
-    
+
     const xMin = -2, xMax = 10;
     const yMin = -2, yMax = 8;
-    const dx = (xMax - xMin) / res;
-    const dy = (yMax - yMin) / res;
+    const worldW = xMax - xMin;
+    const worldH = yMax - yMin;
+
+    const dx = worldW / res;
+    const dy = worldH / res;
+
+    // Scale unification and centering
+    const scale = Math.min(width / worldW, height / worldH);
+    const offsetX = (width - worldW * scale) / 2;
+    const offsetY = (height - worldH * scale) / 2;
+
+    function setWorldTransform() {
+        ctx.setTransform(scale, 0, 0, scale, offsetX - xMin * scale, offsetY - yMin * scale);
+    }
+
+    function pxToWorld(px) {
+        return px / scale;
+    }
 
     let params = {
         x0: 2.0, y0: 2.0, theta: 0.6, L: 5.0, W: 2.0,
@@ -176,7 +191,7 @@
         p1: 1.0, p2: 1.0, p3: 1.0, p4: 1.0
     };
 
-    // --- Математическое ядро ---
+    // Mathematical model
     function sigmoid(z) {
         z = Math.max(-500, Math.min(500, z));
         return 1.0 / (1.0 + Math.exp(-z));
@@ -187,7 +202,7 @@
         const cosT = Math.cos(theta);
         const sinT = Math.sin(theta);
         const a2 = W / 2.0;
-        
+
         const field = new Float32Array(res * res);
         let maxS = 0;
 
@@ -195,22 +210,23 @@
             const worldY = yMin + j * dy + dy * 0.5;
             for (let i = 0; i < res; i++) {
                 const worldX = xMin + i * dx + dx * 0.5;
+
                 const u = (worldX - x0) * cosT + (worldY - y0) * sinT;
                 const n = -(worldX - x0) * sinT + (worldY - y0) * cosT;
 
                 const g_par = Math.pow(sigmoid(k1 * u), p1) * Math.pow(sigmoid(k2 * (L - u)), p2);
                 const g_perp = Math.pow(sigmoid(k3 * (n + a2)), p3) * Math.pow(sigmoid(k4 * (a2 - n)), p4);
-                
+
                 const S = g_par * g_perp;
                 field[j * res + i] = S;
                 if (S > maxS) maxS = S;
             }
         }
+
         return { field, maxS };
     }
 
-    // --- Цветовая схема: ваш градиент ---
-    // Ключевые точки
+    // Color gradient and LUT
     const gradientStops = [
         { t: 0.00, r: 0x40, g: 0x7b, b: 0xf1 },
         { t: 0.25, r: 0x64, g: 0xdb, b: 0xff },
@@ -220,10 +236,9 @@
     ];
 
     function interpolateColor(t) {
-        // Найти интервал
         let i = 0;
-        while (i < gradientStops.length - 1 && t > gradientStops[i+1].t) i++;
-        const a = gradientStops[i], b = gradientStops[i+1];
+        while (i < gradientStops.length - 1 && t > gradientStops[i + 1].t) i++;
+        const a = gradientStops[i], b = gradientStops[i + 1];
         const s = (t - a.t) / (b.t - a.t);
         return {
             r: Math.round(a.r + s * (b.r - a.r)),
@@ -234,132 +249,177 @@
 
     const LUT_SIZE = 256;
     const colorLUT = new Uint32Array(LUT_SIZE);
+
     function buildLUT() {
         for (let i = 0; i < LUT_SIZE; i++) {
             const t = i / (LUT_SIZE - 1);
             const c = interpolateColor(t);
-            // ARGB для Uint32Array (little-endian)
             colorLUT[i] = (255 << 24) | (c.b << 16) | (c.g << 8) | c.r;
         }
     }
     buildLUT();
 
-    // --- Отрисовка ---
-    const imgData = ctx.createImageData(width, height);
-    const buf = new Uint32Array(imgData.data.buffer);
+    // Offscreen heatmap buffer
+    const heatmapCanvas = document.createElement('canvas');
+    heatmapCanvas.width = res;
+    heatmapCanvas.height = res;
+    const heatmapCtx = heatmapCanvas.getContext('2d', { willReadFrequently: true });
+    const heatmapImage = heatmapCtx.createImageData(res, res);
+    const heatmapBuf = new Uint32Array(heatmapImage.data.buffer);
 
-        function draw() {
-        const { field, maxS } = computeField();
-        const norm = maxS > 0 ? 1.0 / maxS : 1.0;
-
-        // 1. Заполнение теплокарты
-        for (let y = 0; y < res; y++) {
-            for (let x = 0; x < res; x++) {
-                const val = Math.max(0, Math.min(1, field[y * res + x] * norm));
+    function buildHeatmap(field, norm) {
+        for (let j = 0; j < res; j++) {
+            for (let i = 0; i < res; i++) {
+                const val = Math.max(0, Math.min(1, field[j * res + i] * norm));
                 const colorIdx = Math.floor(val * (LUT_SIZE - 1));
-                const cy = Math.floor(y * scale), cx = Math.floor(x * scale);
-                
-                for (let dy2 = 0; dy2 < scale; dy2++) {
-                    const py = cy + dy2;
-                    if (py >= height) break;
-                    for (let dx2 = 0; dx2 < scale; dx2++) {
-                        const px = cx + dx2;
-                        if (px >= width) break;
-                        buf[py * width + px] = colorLUT[colorIdx];
+                heatmapBuf[j * res + i] = colorLUT[colorIdx];
+            }
+        }
+        heatmapCtx.putImageData(heatmapImage, 0, 0);
+    }
+
+    // Contour drawing using marching squares
+    function drawContourLevel(field, norm, level, strokeStyle, lineWidthPx) {
+        ctx.save();
+        setWorldTransform();
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = pxToWorld(lineWidthPx);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        for (let j = 0; j < res - 1; j++) {
+            for (let i = 0; i < res - 1; i++) {
+                const v00 = field[j * res + i] * norm;
+                const v10 = field[j * res + i + 1] * norm;
+                const v11 = field[(j + 1) * res + i + 1] * norm;
+                const v01 = field[(j + 1) * res + i] * norm;
+
+                const x0 = xMin + i * dx;
+                const y0 = yMin + j * dy;
+                const x1 = x0 + dx;
+                const y1 = y0 + dy;
+
+                const pts = [];
+
+                function edgePoint(ax, ay, av, bx, by, bv) {
+                    if ((av < level && bv >= level) || (av >= level && bv < level)) {
+                        const t = (level - av) / (bv - av + 1e-12);
+                        return {
+                            x: ax + t * (bx - ax),
+                            y: ay + t * (by - ay)
+                        };
                     }
+                    return null;
+                }
+
+                const pTop = edgePoint(x0, y0, v00, x1, y0, v10);
+                const pRight = edgePoint(x1, y0, v10, x1, y1, v11);
+                const pBottom = edgePoint(x0, y1, v01, x1, y1, v11);
+                const pLeft = edgePoint(x0, y0, v00, x0, y1, v01);
+
+                if (pTop) pts.push(pTop);
+                if (pRight) pts.push(pRight);
+                if (pBottom) pts.push(pBottom);
+                if (pLeft) pts.push(pLeft);
+
+                if (pts.length === 2) {
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    ctx.lineTo(pts[1].x, pts[1].y);
+                    ctx.stroke();
+                } else if (pts.length === 4) {
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    ctx.lineTo(pts[1].x, pts[1].y);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(pts[2].x, pts[2].y);
+                    ctx.lineTo(pts[3].x, pts[3].y);
+                    ctx.stroke();
                 }
             }
         }
-        ctx.putImageData(imgData, 0, 0);
-
-        // 2. Контурные линии уровня (0.2, 0.5, 0.8)
-        ctx.save();
-        // ИСПРАВЛЕНИЕ 1: добавляем сдвиг для корректного маппинга мировых координат в пиксели
-        ctx.setTransform(scale, 0, 0, scale, -xMin * scale, -yMin * scale);
-        
-        // ИСПРАВЛЕНИЕ 2: тёмные контуры для контраста на светлом градиенте
-        ctx.strokeStyle = 'rgba(30, 30, 40, 0.7)';
-        ctx.lineWidth = 0.9;
-        ctx.setLineDash([3, 2]); // Пунктир для лучшей видимости
-        
-        const levels = [0.2, 0.5, 0.8];
-        levels.forEach(level => {
-            ctx.beginPath();
-            let started = false;
-            // Горизонтальные переходы
-            for (let j = 0; j < res; j++) {
-                for (let i = 0; i < res - 1; i++) {
-                    const v1 = field[j * res + i] * norm;
-                    const v2 = field[j * res + i + 1] * norm;
-                    if ((v1 < level && v2 >= level) || (v1 >= level && v2 < level)) {
-                        const t = Math.abs(level - v1) / (Math.abs(v2 - v1) + 1e-10);
-                        const wx = xMin + (i + t) * dx;
-                        const wy = yMin + j * dy;
-                        if (!started) { ctx.moveTo(wx, wy); started = true; }
-                        else ctx.lineTo(wx, wy);
-                    }
-                }
-            }
-            // Вертикальные переходы
-            for (let i = 0; i < res; i++) {
-                for (let j = 0; j < res - 1; j++) {
-                    const v1 = field[j * res + i] * norm;
-                    const v2 = field[(j + 1) * res + i] * norm;
-                    if ((v1 < level && v2 >= level) || (v1 >= level && v2 < level)) {
-                        const t = Math.abs(level - v1) / (Math.abs(v2 - v1) + 1e-10);
-                        const wx = xMin + i * dx;
-                        const wy = yMin + (j + t) * dy;
-                        if (!started) { ctx.moveTo(wx, wy); started = true; }
-                        else ctx.lineTo(wx, wy);
-                    }
-                }
-            }
-            ctx.stroke();
-        });
-        ctx.setLineDash([]); // Сброс пунктира
-
-        // 3. Стартовая точка (контрастная: белая с тёмной обводкой)
-        ctx.beginPath();
-        ctx.arc(params.x0, params.y0, 5.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-
-        // 4. Вектор направления (тёмный для контраста)
-        const endX = params.x0 + params.L * Math.cos(params.theta);
-        const endY = params.y0 + params.L * Math.sin(params.theta);
-        
-        // Основная линия
-        ctx.beginPath();
-        ctx.moveTo(params.x0, params.y0);
-        ctx.lineTo(endX, endY);
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 3.5;
-        ctx.stroke();
-        
-        // Стрелка на конце
-        const arrowLen = 0.7;
-        const arrowAngle = 0.45;
-        const angle = Math.atan2(endY - params.y0, endX - params.x0);
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
-            endX - arrowLen * Math.cos(angle - arrowAngle),
-            endY - arrowLen * Math.sin(angle - arrowAngle)
-        );
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(
-            endX - arrowLen * Math.cos(angle + arrowAngle),
-            endY - arrowLen * Math.sin(angle + arrowAngle)
-        );
-        ctx.stroke();
 
         ctx.restore();
     }
 
-    // --- UI Обработчики ---
+    // Drawing
+    function draw() {
+        const { field, maxS } = computeField();
+        const norm = maxS > 0 ? 1.0 / maxS : 1.0;
+
+        buildHeatmap(field, norm);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        setWorldTransform();
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(heatmapCanvas, xMin, yMin, worldW, worldH);
+        ctx.restore();
+
+        // Contour levels
+        drawContourLevel(field, norm, 0.2, 'rgba(20,20,30,0.28)', 0.8);
+        drawContourLevel(field, norm, 0.5, 'rgba(20,20,30,0.40)', 1.0);
+        drawContourLevel(field, norm, 0.8, 'rgba(20,20,30,0.55)', 1.15);
+
+        // Start point and orientation vector
+        const startX = params.x0;
+        const startY = params.y0;
+        const endX = params.x0 + params.L * Math.cos(params.theta);
+        const endY = params.y0 + params.L * Math.sin(params.theta);
+
+        const arrowLen = pxToWorld(9);
+        const arrowHalfWidth = pxToWorld(4);
+
+        ctx.save();
+        setWorldTransform();
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = 'rgba(15,15,20,0.75)';
+        ctx.lineWidth = pxToWorld(1.6);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(startX, startY, pxToWorld(3.2), 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.lineWidth = pxToWorld(1.2);
+        ctx.strokeStyle = 'rgba(15,15,20,0.85)';
+        ctx.stroke();
+
+        const angle = Math.atan2(endY - startY, endX - startX);
+
+        const backX = endX - arrowLen * Math.cos(angle);
+        const backY = endY - arrowLen * Math.sin(angle);
+
+        const leftX = backX + arrowHalfWidth * Math.sin(angle);
+        const leftY = backY - arrowHalfWidth * Math.cos(angle);
+
+        const rightX = backX - arrowHalfWidth * Math.sin(angle);
+        const rightY = backY + arrowHalfWidth * Math.cos(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(leftX, leftY);
+        ctx.lineTo(rightX, rightY);
+        ctx.closePath();
+
+        ctx.fillStyle = 'rgba(15,15,20,0.75)';
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // UI interactions
     const sliders = ['x0','y0','theta','L','W','k1','k2','k3','k4','p1','p2','p3','p4'];
     sliders.forEach(id => {
         const el = document.getElementById(id);
@@ -371,7 +431,6 @@
         });
     });
 
-    // Инициализация
     draw();
 </script>
 </body>
