@@ -9,7 +9,7 @@
             --bg: #f8f9fa;
             --panel: #ffffff;
             --text: #333;
-            --accent: #2563eb;
+            --accent: #7c3aed;
             --border: #e2e8f0;
         }
         body {
@@ -28,6 +28,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
         header h1 { margin: 0; font-size: 18px; font-weight: 600; }
         header a { color: var(--accent); text-decoration: none; font-size: 13px; }
@@ -57,6 +58,7 @@
             border-left: 1px solid var(--border);
             padding: 20px;
             overflow-y: auto;
+            z-index: 10;
         }
         .control-group { margin-bottom: 16px; }
         .group-title {
@@ -86,7 +88,7 @@
             position: absolute;
             bottom: 30px;
             left: 30px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             padding: 8px 12px;
             border-radius: 6px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -94,12 +96,14 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            z-index: 5;
         }
         .gradient-bar {
             width: 120px;
             height: 10px;
-            background: linear-gradient(to right, #3b82f6, #10b981, #f59e0b, #ef4444);
+            background: linear-gradient(to right, #407bf1, #64dbff, #72ffd9, #7fffb2, #d4ff7f);
             border-radius: 5px;
+            border: 1px solid #ddd;
         }
         .legend-labels { display: flex; justify-content: space-between; margin-top: 2px; }
     </style>
@@ -158,16 +162,14 @@
     const canvas = document.getElementById('heatmap');
     const ctx = canvas.getContext('2d');
     const width = 600, height = 600;
-    const res = 300; // Разрешение сетки вычислений
+    const res = 300;
     const scale = width / res;
     
-    // Мировые координаты
     const xMin = -2, xMax = 10;
     const yMin = -2, yMax = 8;
     const dx = (xMax - xMin) / res;
     const dy = (yMax - yMin) / res;
 
-    // Параметры по умолчанию
     let params = {
         x0: 2.0, y0: 2.0, theta: 0.6, L: 5.0, W: 2.0,
         k1: 3.0, k2: 3.0, k3: 3.0, k4: 3.0,
@@ -193,12 +195,9 @@
             const worldY = yMin + j * dy + dy * 0.5;
             for (let i = 0; i < res; i++) {
                 const worldX = xMin + i * dx + dx * 0.5;
-
-                // Переход в локальную СК
                 const u = (worldX - x0) * cosT + (worldY - y0) * sinT;
                 const n = -(worldX - x0) * sinT + (worldY - y0) * cosT;
 
-                // Продольная и поперечная компоненты с отдельными k и p
                 const g_par = Math.pow(sigmoid(k1 * u), p1) * Math.pow(sigmoid(k2 * (L - u)), p2);
                 const g_perp = Math.pow(sigmoid(k3 * (n + a2)), p3) * Math.pow(sigmoid(k4 * (a2 - n)), p4);
                 
@@ -210,42 +209,56 @@
         return { field, maxS };
     }
 
-    // --- Отрисовка ---
-    const imgData = ctx.createImageData(width, height);
-    const buf = new Uint32Array(imgData.data.buffer);
+    // --- Цветовая схема: ваш градиент ---
+    // Ключевые точки
+    const gradientStops = [
+        { t: 0.00, r: 0x40, g: 0x7b, b: 0xf1 },
+        { t: 0.25, r: 0x64, g: 0xdb, b: 0xff },
+        { t: 0.50, r: 0x72, g: 0xff, b: 0xd9 },
+        { t: 0.75, r: 0x7f, g: 0xff, b: 0xb2 },
+        { t: 1.00, r: 0xd4, g: 0xff, b: 0x7f }
+    ];
 
-    // LUT для быстрого маппинга цветов (Cool-Warm)
+    function interpolateColor(t) {
+        // Найти интервал
+        let i = 0;
+        while (i < gradientStops.length - 1 && t > gradientStops[i+1].t) i++;
+        const a = gradientStops[i], b = gradientStops[i+1];
+        const s = (t - a.t) / (b.t - a.t);
+        return {
+            r: Math.round(a.r + s * (b.r - a.r)),
+            g: Math.round(a.g + s * (b.g - a.g)),
+            b: Math.round(a.b + s * (b.b - a.b))
+        };
+    }
+
     const LUT_SIZE = 256;
     const colorLUT = new Uint32Array(LUT_SIZE);
     function buildLUT() {
         for (let i = 0; i < LUT_SIZE; i++) {
             const t = i / (LUT_SIZE - 1);
-            // Простой градиент: синий -> бирюзовый -> желтый -> красный
-            let r, g, b;
-            if (t < 0.33) { const s=t/0.33; r=59; g=130+15*s; b=246-100*s; }
-            else if (t < 0.66) { const s=(t-0.33)/0.33; r=59+191*s; g=145-60*s; b=146-10*s; }
-            else { const s=(t-0.66)/0.34; r=250+5*s; g=85+60*s; b=136-10*s; }
-            // ARGB format for Uint32Array
-            colorLUT[i] = (255 << 24) | (Math.round(b) << 16) | (Math.round(g) << 8) | Math.round(r);
+            const c = interpolateColor(t);
+            // ARGB для Uint32Array (little-endian)
+            colorLUT[i] = (255 << 24) | (c.b << 16) | (c.g << 8) | c.r;
         }
     }
     buildLUT();
 
-    function draw() {
+    // --- Отрисовка ---
+    const imgData = ctx.createImageData(width, height);
+    const buf = new Uint32Array(imgData.data.buffer);
+
+        function draw() {
         const { field, maxS } = computeField();
         const norm = maxS > 0 ? 1.0 / maxS : 1.0;
 
-        // Заполняем пиксели
+        // 1. Заполнение теплокарты
         for (let y = 0; y < res; y++) {
             for (let x = 0; x < res; x++) {
                 const val = Math.max(0, Math.min(1, field[y * res + x] * norm));
                 const colorIdx = Math.floor(val * (LUT_SIZE - 1));
+                const cy = Math.floor(y * scale), cx = Math.floor(x * scale);
                 
-                // Растягиваем на canvas (простой nearest-neighbor)
-                const cy = Math.floor(y * scale);
-                const cx = Math.floor(x * scale);
-                
-                // Заполняем блок scale x scale
                 for (let dy2 = 0; dy2 < scale; dy2++) {
                     const py = cy + dy2;
                     if (py >= height) break;
@@ -257,28 +270,90 @@
                 }
             }
         }
-
         ctx.putImageData(imgData, 0, 0);
 
-        // --- Оверлеи ---
+        // 2. Контурные линии уровня (0.2, 0.5, 0.8)
         ctx.save();
-        ctx.setTransform(scale, 0, 0, scale, 0, 0); // Переход в мировые координаты
+        // ИСПРАВЛЕНИЕ 1: добавляем сдвиг для корректного маппинга мировых координат в пиксели
+        ctx.setTransform(scale, 0, 0, scale, -xMin * scale, -yMin * scale);
+        
+        // ИСПРАВЛЕНИЕ 2: тёмные контуры для контраста на светлом градиенте
+        ctx.strokeStyle = 'rgba(30, 30, 40, 0.7)';
+        ctx.lineWidth = 0.9;
+        ctx.setLineDash([3, 2]); // Пунктир для лучшей видимости
+        
+        const levels = [0.2, 0.5, 0.8];
+        levels.forEach(level => {
+            ctx.beginPath();
+            let started = false;
+            // Горизонтальные переходы
+            for (let j = 0; j < res; j++) {
+                for (let i = 0; i < res - 1; i++) {
+                    const v1 = field[j * res + i] * norm;
+                    const v2 = field[j * res + i + 1] * norm;
+                    if ((v1 < level && v2 >= level) || (v1 >= level && v2 < level)) {
+                        const t = Math.abs(level - v1) / (Math.abs(v2 - v1) + 1e-10);
+                        const wx = xMin + (i + t) * dx;
+                        const wy = yMin + j * dy;
+                        if (!started) { ctx.moveTo(wx, wy); started = true; }
+                        else ctx.lineTo(wx, wy);
+                    }
+                }
+            }
+            // Вертикальные переходы
+            for (let i = 0; i < res; i++) {
+                for (let j = 0; j < res - 1; j++) {
+                    const v1 = field[j * res + i] * norm;
+                    const v2 = field[(j + 1) * res + i] * norm;
+                    if ((v1 < level && v2 >= level) || (v1 >= level && v2 < level)) {
+                        const t = Math.abs(level - v1) / (Math.abs(v2 - v1) + 1e-10);
+                        const wx = xMin + i * dx;
+                        const wy = yMin + (j + t) * dy;
+                        if (!started) { ctx.moveTo(wx, wy); started = true; }
+                        else ctx.lineTo(wx, wy);
+                    }
+                }
+            }
+            ctx.stroke();
+        });
+        ctx.setLineDash([]); // Сброс пунктира
 
-        // Точка старта
+        // 3. Стартовая точка (контрастная: белая с тёмной обводкой)
         ctx.beginPath();
-        ctx.arc(params.x0, params.y0, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#111';
+        ctx.arc(params.x0, params.y0, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
         ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 2.5;
         ctx.stroke();
 
-        // Вектор направления
+        // 4. Вектор направления (тёмный для контраста)
+        const endX = params.x0 + params.L * Math.cos(params.theta);
+        const endY = params.y0 + params.L * Math.sin(params.theta);
+        
+        // Основная линия
         ctx.beginPath();
         ctx.moveTo(params.x0, params.y0);
-        ctx.lineTo(params.x0 + params.L * Math.cos(params.theta), params.y0 + params.L * Math.sin(params.theta));
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2.5;
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        
+        // Стрелка на конце
+        const arrowLen = 0.7;
+        const arrowAngle = 0.45;
+        const angle = Math.atan2(endY - params.y0, endX - params.x0);
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(
+            endX - arrowLen * Math.cos(angle - arrowAngle),
+            endY - arrowLen * Math.sin(angle - arrowAngle)
+        );
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(
+            endX - arrowLen * Math.cos(angle + arrowAngle),
+            endY - arrowLen * Math.sin(angle + arrowAngle)
+        );
         ctx.stroke();
 
         ctx.restore();
