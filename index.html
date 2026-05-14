@@ -4,209 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model of Coverage Optimization</title>
-    <style>
-        :root {
-            --bg: #f8f9fa;
-            --panel: #ffffff;
-            --text: #333;
-            --accent: #7c3aed;
-            --border: #e2e8f0;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        header {
-            background: var(--panel);
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            z-index: 10;
-        }
-        header h1 { margin: 0; font-size: 18px; font-weight: 600; }
-        header a { color: var(--accent); text-decoration: none; font-size: 13px; white-space: nowrap; }
-
-        .formula-panel {
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 20px 14px;
-        }
-        .formula-grid {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 12px;
-            align-items: start;
-        }
-        .formula-card {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 14px;
-        }
-        .formula-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        .formula {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 14px;
-            line-height: 1.7;
-            overflow-wrap: anywhere;
-        }
-        .formula-note {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #64748b;
-            line-height: 1.5;
-        }
-        .meaning-list {
-            display: grid;
-            gap: 8px;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-        .meaning-item {
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-        }
-        .meaning-item b { color: #111827; }
-
-        .main {
-            display: flex;
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-        }
-        .canvas-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            position: relative;
-            padding: 20px;
-            overflow: hidden;
-        }
-        canvas {
-            width: min(100%, 600px);
-            height: auto;
-            aspect-ratio: 6 / 5;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            cursor: crosshair;
-            display: block;
-            background: #fff;
-        }
-        .controls {
-            width: 340px;
-            background: var(--panel);
-            border-left: 1px solid var(--border);
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 10;
-        }
-        .control-group { margin-bottom: 16px; }
-        .group-title {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-        .param-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            gap: 8px;
-        }
-        .param-row label { font-size: 13px; flex: 1; min-width: 0; }
-        .param-row input[type=range] { flex: 1.5; margin: 0 8px; min-width: 0; }
-        .param-val {
-            width: 48px;
-            text-align: right;
-            font-family: monospace;
-            font-size: 13px;
-            color: var(--accent);
-            flex-shrink: 0;
-        }
-        .legend {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 12px;
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            z-index: 5;
-        }
-        .gradient-bar {
-            width: 120px;
-            height: 10px;
-            background: linear-gradient(to right, #407bf1, #64dbff, #72ffd9, #7fffb2, #d4ff7f);
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .legend-labels { display: flex; justify-content: space-between; margin-top: 2px; }
-
-        @media (max-width: 980px) {
-            .formula-grid { grid-template-columns: 1fr; }
-            .main { flex-direction: column; overflow: visible; }
-            .canvas-container {
-                padding: 12px;
-                order: 1;
-            }
-            .controls {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid var(--border);
-                order: 2;
-                max-height: none;
-                overflow: visible;
-            }
-            canvas { width: min(100%, 640px); }
-            .legend {
-                left: 16px;
-                bottom: 16px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            header {
-                padding: 10px 14px;
-                align-items: flex-start;
-                flex-direction: column;
-            }
-            header h1 { font-size: 16px; }
-            header a { font-size: 12px; }
-            .formula-panel { padding: 10px 14px 12px; }
-            .canvas-container { padding: 10px; }
-            .controls { padding: 14px; }
-            .param-row { align-items: flex-start; }
-            .param-row input[type=range] { margin: 4px 8px 0; }
-            .legend { transform: scale(0.95); transform-origin: bottom left; }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -218,18 +16,25 @@
 <div class="formula-panel">
     <div class="formula-grid">
         <div class="formula-card">
-            <div class="formula-title">Used function</div>
-            <div class="formula">
-                u = (x - x<sub>0</sub>)cosθ + (y - y<sub>0</sub>)sinθ<br>
-                n = −(x - x<sub>0</sub>)sinθ + (y - y<sub>0</sub>)cosθ<br>
-                σ(z) = 1 / (1 + e<sup>−z</sup>)<br><br>
-                S(x,y) = [σ(k<sub>1</sub>u)]<sup>p<sub>1</sub></sup> · [σ(k<sub>2</sub>(L − u))]<sup>p<sub>2</sub></sup> · [σ(k<sub>3</sub>(n + W/2))]<sup>p<sub>3</sub></sup> · [σ(k<sub>4</sub>(W/2 − n))]<sup>p<sub>4</sub></sup>
+            <div class="formula-title">Field model</div>
+            <div id="fieldFormula" class="formula-block active">
+                <div class="formula">
+                    u = (x - x<sub>0</sub>)cosθ + (y - y<sub>0</sub>)sinθ<br>
+                    n = −(x - x<sub>0</sub>)sinθ + (y - y<sub>0</sub>)cosθ<br>
+                    σ(z) = 1 / (1 + e<sup>−z</sup>)<br><br>
+                    S(x,y) = [σ(k<sub>1</sub>u)]<sup>p<sub>1</sub></sup> · [σ(k<sub>2</sub>(L − u))]<sup>p<sub>2</sub></sup> · [σ(k<sub>3</sub>(n + W/2))]<sup>p<sub>3</sub></sup> · [σ(k<sub>4</sub>(W/2 − n))]<sup>p<sub>4</sub></sup>
+                </div>
             </div>
-        </div>
-        <div class="formula-card">
-            <div class="formula-title">Hover the controls</div>
-            <div class="formula-note">
-                Tooltips are attached to each slider so the explanation appears only when you hover or focus the parameter.
+            <div id="pointsFormula" class="formula-block">
+                <div class="formula">
+                    g<sub>∥</sub>(u) = [σ(k<sub>1</sub>u)]<sup>p<sub>1</sub></sup> · [σ(k<sub>2</sub>(L − u))]<sup>p<sub>2</sub></sup><br>
+                    g<sub>⊥</sub>(n) = [σ(k<sub>3</sub>(n + W/2))]<sup>p<sub>3</sub></sup> · [σ(k<sub>4</sub>(W/2 − n))]<sup>p<sub>4</sub></sup><br><br>
+                    F = Σ g<sub>∥</sub>(u<sub>i</sub>)·g<sub>⊥</sub>(n<sub>i</sub>) − k<sub>6</sub>·Σ softplus(k<sub>5</sub>(ε − d<sub>i</sub>))<br>
+                    d<sub>i</sub> = √((x<sub>0</sub>−x<sub>i</sub>)² + (y<sub>0</sub>−y<sub>i</sub>)² + δ²)
+                </div>
+                <div class="formula-note">
+                    k₁–k₄, p₁–p₄ — параметры покрытия; k₅ (sharpness), k₆ (weight) — параметры штрафа за близость.
+                </div>
             </div>
         </div>
     </div>
@@ -238,7 +43,7 @@
 <div class="main">
     <div class="canvas-container">
         <canvas id="heatmap" width="600" height="500"></canvas>
-        <div class="legend">
+        <div class="legend" id="legendBox">
             <div class="gradient-bar"></div>
             <div class="legend-labels">
                 <span>0.0</span>
@@ -247,32 +52,98 @@
             </div>
             <div style="margin-top:4px; color:#555;">Value of Indicator</div>
         </div>
+        <div id="pointControls" class="point-controls" style="display:none;">
+            <div class="group-title">Target points</div>
+            <div class="param-row">
+                <label>Random count</label>
+                <input type="number" id="randCount" min="1" max="100" step="1" value="25">
+            </div>
+            <div class="button-row">
+                <button class="action-btn primary" id="generateBtn">Generate random</button>
+                <button class="action-btn danger" id="clearBtn">Clear all</button>
+            </div>
+            <div class="formula-note" style="margin-top:8px;">
+                Tap the canvas to add a target. Tap an existing point to remove it.
+            </div>
+        </div>
     </div>
 
     <div class="controls">
-        <div class="control-group">
-            <div class="group-title">Geometry and Orientation</div>
-            <div class="param-row"><label title="Starting x-coordinate of the coverage strip">x₀ (start)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0" title="Starting x-coordinate of the coverage strip"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label title="Starting y-coordinate of the coverage strip">y₀ (start)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0" title="Starting y-coordinate of the coverage strip"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label title="Orientation angle in radians">θ (angle, rad)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6" title="Orientation angle in radians"><span class="param-val">0.60</span></div>
-            <div class="param-row"><label title="Length of the coverage segment">L (vector length)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0" title="Length of the coverage segment"><span class="param-val">5.0</span></div>
-            <div class="param-row"><label title="Width of the coverage strip">W (width of the area)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0" title="Width of the coverage strip"><span class="param-val">2.0</span></div>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="field">Field tab</button>
+            <button class="tab-btn" data-tab="points">Points tab</button>
         </div>
 
-        <div class="control-group">
-            <div class="group-title">Edge Sharpness (k)</div>
-            <div class="param-row"><label title="Sharpness coefficient for the start edge along the strip">k₁ (start)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the start edge along the strip"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label title="Sharpness coefficient for the end edge along the strip">k₂ (end)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the end edge along the strip"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label title="Sharpness coefficient for the left boundary">k₃ (left)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the left boundary"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label title="Sharpness coefficient for the right boundary">k₄ (right)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the right boundary"><span class="param-val">3.0</span></div>
+        <div id="summaryBox" class="summary-box">
+            <div class="help-title">Points objective</div>
+            <div>Move to the points tab to see the softplus objective update live.</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Points</div>
+                    <div class="value" id="pointCount">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Score</div>
+                    <div class="value" id="pointScore">0.0000</div>
+                </div>
+            </div>
         </div>
 
-        <div class="control-group">
-            <div class="group-title">Degrees of Distortion (p)</div>
-            <div class="param-row"><label title="Distortion exponent for the start edge">p₁ (start)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the start edge"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label title="Distortion exponent for the end edge">p₂ (end)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the end edge"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label title="Distortion exponent for the left boundary">p₃ (left)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the left boundary"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label title="Distortion exponent for the right boundary">p₄ (right)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the right boundary"><span class="param-val">1.0</span></div>
+        <div id="fieldPanel" class="tab-panel active">
+            <div class="control-group">
+                <div class="group-title">Geometry and Orientation</div>
+                <div class="param-row"><label>x₀ (start)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+                <div class="param-row"><label>y₀ (start)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+                <div class="param-row"><label>θ (angle, rad)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6"><span class="param-val">0.60</span></div>
+                <div class="param-row"><label>L (vector length)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0"><span class="param-val">5.0</span></div>
+                <div class="param-row"><label>W (width of the area)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0"><span class="param-val">2.0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="group-title">Edge Sharpness (k)</div>
+                <div class="param-row"><label>k₁ (start)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₂ (end)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₃ (left)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₄ (right)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="group-title">Degrees of Distortion (p)</div>
+                <div class="param-row"><label>p₁ (start)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₂ (end)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₃ (left)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₄ (right)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            </div>
+        </div>
+
+        <div id="pointsPanel" class="tab-panel">
+            <div class="control-group">
+                <div class="group-title">Geometry and Orientation</div>
+                <div class="param-row"><label>x₀ (start)</label><input type="range" id="px0" min="-2" max="10" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+                <div class="param-row"><label>y₀ (start)</label><input type="range" id="py0" min="-2" max="8" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
+                <div class="param-row"><label>θ (angle, rad)</label><input type="range" id="ptheta" min="0" max="6.28" step="0.05" value="0.6"><span class="param-val">0.60</span></div>
+                <div class="param-row"><label>L (vector length)</label><input type="range" id="pL" min="1" max="12" step="0.5" value="5.0"><span class="param-val">5.0</span></div>
+                <div class="param-row"><label>W (width of the area)</label><input type="range" id="pW" min="0.5" max="6" step="0.25" value="2.0"><span class="param-val">2.0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="group-title">Coverage coefficients</div>
+                <div class="param-row"><label>k₁ (start)</label><input type="range" id="pk1" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₂ (end)</label><input type="range" id="pk2" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₃ (left)</label><input type="range" id="pk3" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₄ (right)</label><input type="range" id="pk4" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="group-title">Exponents</div>
+                <div class="param-row"><label>p₁ (start)</label><input type="range" id="pp1" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₂ (end)</label><input type="range" id="pp2" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₃ (left)</label><input type="range" id="pp3" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>p₄ (right)</label><input type="range" id="pp4" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="group-title">Softplus penalty</div>
+                <div class="param-row"><label>ε (distance limit)</label><input type="range" id="epsilon" min="0.1" max="3" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+                <div class="param-row"><label>δ (stability)</label><input type="range" id="delta" min="0.0001" max="0.1" step="0.0001" value="0.001"><span class="param-val">0.0010</span></div>
+                <div class="param-row"><label>k₅ (softplus sharpness)</label><input type="range" id="softK" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+                <div class="param-row"><label>k₆ (penalty weight)</label><input type="range" id="penaltyK" min="0.1" max="10" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            </div>
         </div>
     </div>
 </div>
@@ -282,15 +153,12 @@
     const ctx = canvas.getContext('2d');
     const width = 600, height = 500;
     const res = 300;
-
     const xMin = -2, xMax = 10;
     const yMin = -2, yMax = 8;
     const worldW = xMax - xMin;
     const worldH = yMax - yMin;
-
     const dx = worldW / res;
     const dy = worldH / res;
-
     const scale = Math.min(width / worldW, height / worldH);
     const offsetX = (width - worldW * scale) / 2;
     const offsetY = (height - worldH * scale) / 2;
@@ -299,96 +167,127 @@
         ctx.setTransform(scale, 0, 0, scale, offsetX - xMin * scale, offsetY - yMin * scale);
     }
 
-    function pxToWorld(px) {
-        return px / scale;
+    function pxToWorld(px) { return px / scale; }
+
+    function canvasPxToWorld(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const px = (clientX - rect.left) * (canvas.width / rect.width);
+        const py = (clientY - rect.top) * (canvas.height / rect.height);
+        return { x: xMin + (px - offsetX) / scale, y: yMin + (py - offsetY) / scale };
     }
 
+    let activeTab = 'field';
     let params = {
         x0: 2.0, y0: 2.0, theta: 0.6, L: 5.0, W: 2.0,
         k1: 3.0, k2: 3.0, k3: 3.0, k4: 3.0,
-        p1: 1.0, p2: 1.0, p3: 1.0, p4: 1.0
+        p1: 1.0, p2: 1.0, p3: 1.0, p4: 1.0,
+        epsilon: 1.0, delta: 0.001, softK: 3.0, penaltyK: 1.0,
+        px0: 2.0, py0: 2.0, ptheta: 0.6, pL: 5.0, pW: 2.0,
+        pk1: 3.0, pk2: 3.0, pk3: 3.0, pk4: 3.0,
+        pp1: 1.0, pp2: 1.0, pp3: 1.0, pp4: 1.0
     };
-
+    const pointState = { points: [] };
     const valueDecimals = {
-        x0: 1, y0: 1, theta: 2, L: 1, W: 1,
-        k1: 1, k2: 1, k3: 1, k4: 1,
-        p1: 1, p2: 1, p3: 1, p4: 1
+        x0:1,y0:1,theta:2,L:1,W:1,k1:1,k2:1,k3:1,k4:1,p1:1,p2:1,p3:1,p4:1,
+        epsilon:1,delta:4,softK:1,penaltyK:1,
+        px0:1,py0:1,ptheta:2,pL:1,pW:1,pk1:1,pk2:1,pk3:1,pk4:1,pp1:1,pp2:1,pp3:1,pp4:1
     };
 
-    function formatValue(id, value) {
-        const decimals = valueDecimals[id] ?? 1;
-        return Number(value).toFixed(decimals);
-    }
-
-    function sigmoid(z) {
-        z = Math.max(-500, Math.min(500, z));
-        return 1.0 / (1.0 + Math.exp(-z));
-    }
+    function formatValue(id, v) { return Number(v).toFixed(valueDecimals[id] ?? 1); }
+    function sigmoid(z) { z = Math.max(-500, Math.min(500, z)); return 1 / (1 + Math.exp(-z)); }
+    function softplus(z) { if (z > 50) return z; if (z < -50) return Math.exp(z); return Math.log1p(Math.exp(z)); }
 
     function computeField() {
         const { x0, y0, theta, L, W, k1, k2, k3, k4, p1, p2, p3, p4 } = params;
-        const cosT = Math.cos(theta);
-        const sinT = Math.sin(theta);
-        const a2 = W / 2.0;
-
+        const cosT = Math.cos(theta), sinT = Math.sin(theta), a2 = W / 2;
         const field = new Float32Array(res * res);
         let maxS = 0;
-
         for (let j = 0; j < res; j++) {
             const worldY = yMin + j * dy + dy * 0.5;
             for (let i = 0; i < res; i++) {
                 const worldX = xMin + i * dx + dx * 0.5;
-
                 const u = (worldX - x0) * cosT + (worldY - y0) * sinT;
                 const n = -(worldX - x0) * sinT + (worldY - y0) * cosT;
-
-                const g_par = Math.pow(sigmoid(k1 * u), p1) * Math.pow(sigmoid(k2 * (L - u)), p2);
-                const g_perp = Math.pow(sigmoid(k3 * (n + a2)), p3) * Math.pow(sigmoid(k4 * (a2 - n)), p4);
-
-                const S = g_par * g_perp;
+                const gPar = Math.pow(sigmoid(k1 * u), p1) * Math.pow(sigmoid(k2 * (L - u)), p2);
+                const gPerp = Math.pow(sigmoid(k3 * (n + a2)), p3) * Math.pow(sigmoid(k4 * (a2 - n)), p4);
+                const S = gPar * gPerp;
                 field[j * res + i] = S;
                 if (S > maxS) maxS = S;
             }
         }
-
         return { field, maxS };
     }
 
-    const gradientStops = [
-        { t: 0.00, r: 0x40, g: 0x7b, b: 0xf1 },
-        { t: 0.25, r: 0x64, g: 0xdb, b: 0xff },
-        { t: 0.50, r: 0x72, g: 0xff, b: 0xd9 },
-        { t: 0.75, r: 0x7f, g: 0xff, b: 0xb2 },
-        { t: 1.00, r: 0xd4, g: 0xff, b: 0x7f }
-    ];
+    function computePointField() {
+        const { px0, py0, ptheta, pL, pW, pk1, pk2, pk3, pk4, pp1, pp2, pp3, pp4, epsilon, delta, softK, penaltyK } = params;
+        const pts = pointState.points;
+        const cosT = Math.cos(ptheta), sinT = Math.sin(ptheta), a2 = pW / 2;
+        const field = new Float32Array(res * res);
+        let maxVal = -Infinity, minVal = Infinity;
+        for (let j = 0; j < res; j++) {
+            const worldY = yMin + j * dy + dy * 0.5;
+            for (let i = 0; i < res; i++) {
+                const worldX = xMin + i * dx + dx * 0.5;
+                const u = (worldX - px0) * cosT + (worldY - py0) * sinT;
+                const n = -(worldX - px0) * sinT + (worldY - py0) * cosT;
+                const gPar = Math.pow(sigmoid(pk1 * u), pp1) * Math.pow(sigmoid(pk2 * (pL - u)), pp2);
+                const gPerp = Math.pow(sigmoid(pk3 * (n + a2)), pp3) * Math.pow(sigmoid(pk4 * (a2 - n)), pp4);
+                let value = gPar * gPerp;
+                for (const pt of pts) {
+                    const dist = Math.sqrt((worldX - pt.x)**2 + (worldY - pt.y)**2 + delta**2);
+                    value -= penaltyK * softplus(softK * (epsilon - dist));
+                }
+                field[j * res + i] = value;
+                if (value > maxVal) maxVal = value;
+                if (value < minVal) minVal = value;
+            }
+        }
+        const range = maxVal - minVal || 1;
+        for (let k = 0; k < field.length; k++) field[k] = (field[k] - minVal) / range;
+        return { field, maxS: 1 };
+    }
 
+    function computePointObjective() {
+        const { px0, py0, ptheta, pL, pW, pk1, pk2, pk3, pk4, pp1, pp2, pp3, pp4, epsilon, delta, softK, penaltyK } = params;
+        const pts = pointState.points;
+        const cosT = Math.cos(ptheta), sinT = Math.sin(ptheta), a2 = pW / 2;
+        let score = 0, minDist = Infinity;
+        for (const pt of pts) {
+            const dx0 = pt.x - px0, dy0 = pt.y - py0;
+            const u = dx0 * cosT + dy0 * sinT, n = -dx0 * sinT + dy0 * cosT;
+            const gPar = Math.pow(sigmoid(pk1 * u), pp1) * Math.pow(sigmoid(pk2 * (pL - u)), pp2);
+            const gPerp = Math.pow(sigmoid(pk3 * (n + a2)), pp3) * Math.pow(sigmoid(pk4 * (a2 - n)), pp4);
+            score += gPar * gPerp;
+            const dist = Math.sqrt(dx0*dx0 + dy0*dy0 + delta*delta);
+            if (dist < minDist) minDist = dist;
+            score -= penaltyK * softplus(softK * (epsilon - dist));
+        }
+        if (!Number.isFinite(minDist)) minDist = 0;
+        return { score, minDist };
+    }
+
+    const gradientStops = [
+        {t:0.00,r:0x40,g:0x7b,b:0xf1},{t:0.25,r:0x64,g:0xdb,b:0xff},
+        {t:0.50,r:0x72,g:0xff,b:0xd9},{t:0.75,r:0x7f,g:0xff,b:0xb2},
+        {t:1.00,r:0xd4,g:0xff,b:0x7f}
+    ];
     function interpolateColor(t) {
         let i = 0;
         while (i < gradientStops.length - 1 && t > gradientStops[i + 1].t) i++;
-        const a = gradientStops[i], b = gradientStops[i + 1];
-        const s = (t - a.t) / (b.t - a.t);
-        return {
-            r: Math.round(a.r + s * (b.r - a.r)),
-            g: Math.round(a.g + s * (b.g - a.g)),
-            b: Math.round(a.b + s * (b.b - a.b))
-        };
+        const a = gradientStops[i], b = gradientStops[i + 1], s = (t - a.t) / (b.t - a.t);
+        return { r: Math.round(a.r + s*(b.r-a.r)), g: Math.round(a.g + s*(b.g-a.g)), b: Math.round(a.b + s*(b.b-a.b)) };
     }
-
-    const LUT_SIZE = 256;
-    const colorLUT = new Uint32Array(LUT_SIZE);
-
+    const LUT_SIZE = 256, colorLUT = new Uint32Array(LUT_SIZE);
     function buildLUT() {
         for (let i = 0; i < LUT_SIZE; i++) {
-            const t = i / (LUT_SIZE - 1);
-            const c = interpolateColor(t);
+            const c = interpolateColor(i / (LUT_SIZE - 1));
             colorLUT[i] = (255 << 24) | (c.b << 16) | (c.g << 8) | c.r;
         }
     }
     buildLUT();
 
     const heatmapCanvas = document.createElement('canvas');
-    heatmapCanvas.width = res;
-    heatmapCanvas.height = res;
+    heatmapCanvas.width = res; heatmapCanvas.height = res;
     const heatmapCtx = heatmapCanvas.getContext('2d', { willReadFrequently: true });
     const heatmapImage = heatmapCtx.createImageData(res, res);
     const heatmapBuf = new Uint32Array(heatmapImage.data.buffer);
@@ -397,157 +296,132 @@
         for (let j = 0; j < res; j++) {
             for (let i = 0; i < res; i++) {
                 const val = Math.max(0, Math.min(1, field[j * res + i] * norm));
-                const colorIdx = Math.floor(val * (LUT_SIZE - 1));
-                heatmapBuf[j * res + i] = colorLUT[colorIdx];
+                heatmapBuf[j * res + i] = colorLUT[Math.floor(val * (LUT_SIZE - 1))];
             }
         }
         heatmapCtx.putImageData(heatmapImage, 0, 0);
     }
 
     function drawContourLevel(field, norm, level, strokeStyle, lineWidthPx) {
-        ctx.save();
-        setWorldTransform();
-        ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = pxToWorld(lineWidthPx);
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-
+        ctx.save(); setWorldTransform();
+        ctx.strokeStyle = strokeStyle; ctx.lineWidth = pxToWorld(lineWidthPx);
+        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
         for (let j = 0; j < res - 1; j++) {
             for (let i = 0; i < res - 1; i++) {
-                const v00 = field[j * res + i] * norm;
-                const v10 = field[j * res + i + 1] * norm;
-                const v11 = field[(j + 1) * res + i + 1] * norm;
-                const v01 = field[(j + 1) * res + i] * norm;
-
-                const x0 = xMin + i * dx;
-                const y0 = yMin + j * dy;
-                const x1 = x0 + dx;
-                const y1 = y0 + dy;
-
+                const v00 = field[j*res+i]*norm, v10 = field[j*res+i+1]*norm;
+                const v11 = field[(j+1)*res+i+1]*norm, v01 = field[(j+1)*res+i]*norm;
+                const x0 = xMin + i*dx, y0 = yMin + j*dy, x1 = x0+dx, y1 = y0+dy;
                 const pts = [];
-
-                function edgePoint(ax, ay, av, bx, by, bv) {
-                    if ((av < level && bv >= level) || (av >= level && bv < level)) {
-                        const t = (level - av) / (bv - av + 1e-12);
-                        return {
-                            x: ax + t * (bx - ax),
-                            y: ay + t * (by - ay)
-                        };
+                function edge(ax,ay,av,bx,by,bv) {
+                    if ((av<level&&bv>=level)||(av>=level&&bv<level)) {
+                        const t = (level-av)/(bv-av+1e-12);
+                        return {x:ax+t*(bx-ax), y:ay+t*(by-ay)};
                     }
                     return null;
                 }
-
-                const pTop = edgePoint(x0, y0, v00, x1, y0, v10);
-                const pRight = edgePoint(x1, y0, v10, x1, y1, v11);
-                const pBottom = edgePoint(x0, y1, v01, x1, y1, v11);
-                const pLeft = edgePoint(x0, y0, v00, x0, y1, v01);
-
-                if (pTop) pts.push(pTop);
-                if (pRight) pts.push(pRight);
-                if (pBottom) pts.push(pBottom);
-                if (pLeft) pts.push(pLeft);
-
-                if (pts.length === 2) {
-                    ctx.beginPath();
-                    ctx.moveTo(pts[0].x, pts[0].y);
-                    ctx.lineTo(pts[1].x, pts[1].y);
-                    ctx.stroke();
-                } else if (pts.length === 4) {
-                    ctx.beginPath();
-                    ctx.moveTo(pts[0].x, pts[0].y);
-                    ctx.lineTo(pts[1].x, pts[1].y);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.moveTo(pts[2].x, pts[2].y);
-                    ctx.lineTo(pts[3].x, pts[3].y);
-                    ctx.stroke();
-                }
+                const pT=edge(x0,y0,v00,x1,y0,v10), pR=edge(x1,y0,v10,x1,y1,v11);
+                const pB=edge(x0,y1,v01,x1,y1,v11), pL=edge(x0,y0,v00,x0,y1,v01);
+                if(pT)pts.push(pT); if(pR)pts.push(pR); if(pB)pts.push(pB); if(pL)pts.push(pL);
+                if(pts.length===2){ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);ctx.stroke();}
+                else if(pts.length===4){ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);ctx.stroke();ctx.beginPath();ctx.moveTo(pts[2].x,pts[2].y);ctx.lineTo(pts[3].x,pts[3].y);ctx.stroke();}
             }
         }
-
         ctx.restore();
+    }
+
+    function drawStrips(x0,y0,theta,L,W) {
+        const sx=x0,sy=y0,ex=x0+L*Math.cos(theta),ey=y0+L*Math.sin(theta);
+        const al=pxToWorld(9),ah=pxToWorld(4);
+        ctx.save(); setWorldTransform();
+        ctx.lineCap='round';ctx.lineJoin='round';
+        ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);
+        ctx.strokeStyle='rgba(15,15,20,0.75)';ctx.lineWidth=pxToWorld(1.6);ctx.stroke();
+        ctx.beginPath();ctx.arc(sx,sy,pxToWorld(3.2),0,Math.PI*2);
+        ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=pxToWorld(1.2);ctx.strokeStyle='rgba(15,15,20,0.85)';ctx.stroke();
+        const ang=Math.atan2(ey-sy,ex-sx),bx=ex-al*Math.cos(ang),by=ey-al*Math.sin(ang);
+        const lx=bx+ah*Math.sin(ang),ly=by-ah*Math.cos(ang),rx=bx-ah*Math.sin(ang),ry=by+ah*Math.cos(ang);
+        ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(lx,ly);ctx.lineTo(rx,ry);ctx.closePath();
+        ctx.fillStyle='rgba(15,15,20,0.75)';ctx.fill();ctx.restore();
+    }
+
+    function drawPoints(points) {
+        ctx.save(); setWorldTransform(); ctx.lineWidth = pxToWorld(1.2);
+        points.forEach(pt => {
+            ctx.beginPath(); ctx.arc(pt.x, pt.y, pxToWorld(4.2), 0, Math.PI*2);
+            ctx.fillStyle='#111827'; ctx.fill(); ctx.strokeStyle='#fff'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(pt.x, pt.y, pxToWorld(params.epsilon*scale), 0, Math.PI*2);
+            ctx.fillStyle='rgba(185,28,28,0.12)'; ctx.fill();
+            ctx.strokeStyle='rgba(185,28,28,0.4)'; ctx.setLineDash([pxToWorld(3),pxToWorld(2)]); ctx.stroke(); ctx.setLineDash([]);
+        });
+        ctx.restore();
+    }
+
+    function drawPointObjectiveDetails() {
+        const {score} = computePointObjective();
+        document.getElementById('pointCount').textContent = pointState.points.length;
+        document.getElementById('pointScore').textContent = score.toFixed(4);
     }
 
     function draw() {
-        const { field, maxS } = computeField();
-        const norm = maxS > 0 ? 1.0 / maxS : 1.0;
-
+        const fieldMode = activeTab === 'field';
+        const {field, maxS} = fieldMode ? computeField() : computePointField();
+        const norm = maxS > 0 ? 1/maxS : 1;
         buildHeatmap(field, norm);
-
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.save();
-        setWorldTransform();
-        ctx.imageSmoothingEnabled = true;
-        ctx.drawImage(heatmapCanvas, xMin, yMin, worldW, worldH);
-        ctx.restore();
-
+        ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,width,height);
+        ctx.save(); setWorldTransform(); ctx.imageSmoothingEnabled=true;
+        ctx.drawImage(heatmapCanvas, xMin, yMin, worldW, worldH); ctx.restore();
         drawContourLevel(field, norm, 0.2, 'rgba(20,20,30,0.28)', 0.8);
         drawContourLevel(field, norm, 0.5, 'rgba(20,20,30,0.40)', 1.0);
         drawContourLevel(field, norm, 0.8, 'rgba(20,20,30,0.55)', 1.15);
-
-        const startX = params.x0;
-        const startY = params.y0;
-        const endX = params.x0 + params.L * Math.cos(params.theta);
-        const endY = params.y0 + params.L * Math.sin(params.theta);
-
-        const arrowLen = pxToWorld(9);
-        const arrowHalfWidth = pxToWorld(4);
-
-        ctx.save();
-        setWorldTransform();
-
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.strokeStyle = 'rgba(15,15,20,0.75)';
-        ctx.lineWidth = pxToWorld(1.6);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(startX, startY, pxToWorld(3.2), 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-
-        ctx.lineWidth = pxToWorld(1.2);
-        ctx.strokeStyle = 'rgba(15,15,20,0.85)';
-        ctx.stroke();
-
-        const angle = Math.atan2(endY - startY, endX - startX);
-        const backX = endX - arrowLen * Math.cos(angle);
-        const backY = endY - arrowLen * Math.sin(angle);
-        const leftX = backX + arrowHalfWidth * Math.sin(angle);
-        const leftY = backY - arrowHalfWidth * Math.cos(angle);
-        const rightX = backX - arrowHalfWidth * Math.sin(angle);
-        const rightY = backY + arrowHalfWidth * Math.cos(angle);
-
-        ctx.beginPath();
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(leftX, leftY);
-        ctx.lineTo(rightX, rightY);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(15,15,20,0.75)';
-        ctx.fill();
-
-        ctx.restore();
+        if (fieldMode) drawStrips(params.x0, params.y0, params.theta, params.L, params.W);
+        else { drawStrips(params.px0, params.py0, params.ptheta, params.pL, params.pW); drawPoints(pointState.points); }
+        drawPointObjectiveDetails();
     }
 
-    const sliders = ['x0','y0','theta','L','W','k1','k2','k3','k4','p1','p2','p3','p4'];
-    sliders.forEach(id => {
-        const el = document.getElementById(id);
-        const valEl = el.parentElement.querySelector('.param-val');
-        const syncValue = () => {
-            params[id] = parseFloat(el.value);
-            valEl.textContent = formatValue(id, el.value);
-            draw();
-        };
-        el.addEventListener('input', syncValue);
-        syncValue();
+    const sliderIds = ['x0','y0','theta','L','W','k1','k2','k3','k4','p1','p2','p3','p4','epsilon','delta','softK','penaltyK','px0','py0','ptheta','pL','pW','pk1','pk2','pk3','pk4','pp1','pp2','pp3','pp4'];
+    sliderIds.forEach(id => {
+        const el = document.getElementById(id), valEl = el.parentElement.querySelector('.param-val');
+        const sync = () => { params[id] = parseFloat(el.value); valEl.textContent = formatValue(id, el.value); draw(); };
+        el.addEventListener('input', sync); sync();
+    });
+
+    document.getElementById('randCount').addEventListener('input', e => {
+        let v = parseInt(e.target.value||'1',10); if (!Number.isFinite(v)||v<1) v=1; if (v>100) v=100; e.target.value = String(v);
+    });
+
+    function setActiveTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab===tab));
+        document.getElementById('fieldPanel').classList.toggle('active', tab==='field');
+        document.getElementById('pointsPanel').classList.toggle('active', tab==='points');
+        document.getElementById('fieldFormula').classList.toggle('active', tab==='field');
+        document.getElementById('pointsFormula').classList.toggle('active', tab==='points');
+        document.getElementById('pointControls').style.display = (tab==='points') ? 'block' : 'none';
+        draw();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        const count = Math.max(1, Math.min(100, parseInt(document.getElementById('randCount').value||'1',10)));
+        pointState.points = Array.from({length:count}, () => ({x: xMin+Math.random()*worldW, y: yMin+Math.random()*worldH}));
+        setActiveTab('points'); draw();
+    });
+    document.getElementById('clearBtn').addEventListener('click', () => { pointState.points = []; setActiveTab('points'); draw(); });
+
+    function nearestPoint(wp, thr=0.18) {
+        let bi=-1, bd=Infinity;
+        for (let i=0;i<pointState.points.length;i++) {
+            const p=pointState.points[i], d=Math.hypot(p.x-wp.x, p.y-wp.y);
+            if (d<bd) {bd=d; bi=i;}
+        }
+        return bd<=thr ? bi : -1;
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+        if (activeTab!=='points') return;
+        const wp = canvasPxToWorld(e.clientX, e.clientY), hit = nearestPoint(wp);
+        if (hit>=0) pointState.points.splice(hit,1); else pointState.points.push({x:wp.x, y:wp.y});
+        draw();
     });
 
     draw();
