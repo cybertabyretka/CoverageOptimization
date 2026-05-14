@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +12,13 @@
             --accent: #7c3aed;
             --border: #e2e8f0;
         }
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -28,14 +29,67 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             z-index: 10;
         }
         header h1 { margin: 0; font-size: 18px; font-weight: 600; }
-        header a { color: var(--accent); text-decoration: none; font-size: 13px; }
-        
+        header a { color: var(--accent); text-decoration: none; font-size: 13px; white-space: nowrap; }
+
+        .formula-panel {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px 14px;
+        }
+        .formula-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 12px;
+            align-items: start;
+        }
+        .formula-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .formula-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .formula {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+        .formula-note {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        .meaning-list {
+            display: grid;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .meaning-item {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+        .meaning-item b { color: #111827; }
+
         .main {
             display: flex;
             flex: 1;
+            min-height: 0;
             overflow: hidden;
         }
         .canvas-container {
@@ -46,11 +100,17 @@
             background: #fff;
             position: relative;
             padding: 20px;
+            overflow: hidden;
         }
         canvas {
+            width: min(100%, 600px);
+            height: auto;
+            aspect-ratio: 6 / 5;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-radius: 8px;
             cursor: crosshair;
+            display: block;
+            background: #fff;
         }
         .controls {
             width: 340px;
@@ -74,15 +134,17 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
+            gap: 8px;
         }
-        .param-row label { font-size: 13px; flex: 1; }
-        .param-row input[type=range] { flex: 1.5; margin: 0 8px; }
-        .param-val { 
-            width: 36px; 
-            text-align: right; 
-            font-family: monospace; 
-            font-size: 13px; 
-            color: var(--accent); 
+        .param-row label { font-size: 13px; flex: 1; min-width: 0; }
+        .param-row input[type=range] { flex: 1.5; margin: 0 8px; min-width: 0; }
+        .param-val {
+            width: 48px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 13px;
+            color: var(--accent);
+            flex-shrink: 0;
         }
         .legend {
             position: absolute;
@@ -106,18 +168,78 @@
             border: 1px solid #ddd;
         }
         .legend-labels { display: flex; justify-content: space-between; margin-top: 2px; }
+
+        @media (max-width: 980px) {
+            .formula-grid { grid-template-columns: 1fr; }
+            .main { flex-direction: column; overflow: visible; }
+            .canvas-container {
+                padding: 12px;
+                order: 1;
+            }
+            .controls {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                order: 2;
+                max-height: none;
+                overflow: visible;
+            }
+            canvas { width: min(100%, 640px); }
+            .legend {
+                left: 16px;
+                bottom: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                padding: 10px 14px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            header h1 { font-size: 16px; }
+            header a { font-size: 12px; }
+            .formula-panel { padding: 10px 14px 12px; }
+            .canvas-container { padding: 10px; }
+            .controls { padding: 14px; }
+            .param-row { align-items: flex-start; }
+            .param-row input[type=range] { margin: 4px 8px 0; }
+            .legend { transform: scale(0.95); transform-origin: bottom left; }
+        }
     </style>
 </head>
 <body>
 
 <header>
     <h1>Visualization of Coverage Optimization Model</h1>
-    <a href="https://github.com/cybertabyretka/CoverageOptimization" target="_blank">Source Code ↗</a>
+    <a href="https://github.com/cybertabyretka/CoverageOptimization" target="_blank" rel="noopener noreferrer">Source Code ↗</a>
 </header>
+
+<div class="formula-panel">
+    <div class="formula-grid">
+        <div class="formula-card">
+            <div class="formula-title">Used function</div>
+            <div class="formula">
+                u = (x - x<sub>0</sub>)cosθ + (y - y<sub>0</sub>)sinθ<br>
+                n = −(x - x<sub>0</sub>)sinθ + (y - y<sub>0</sub>)cosθ<br><br>
+                S(x,y) = [σ(k<sub>1</sub>u)]<sup>p<sub>1</sub></sup> · [σ(k<sub>2</sub>(L − u))]<sup>p<sub>2</sub></sup> · [σ(k<sub>3</sub>(n + W/2))]<sup>p<sub>3</sub></sup> · [σ(k<sub>4</sub>(W/2 − n))]<sup>p<sub>4</sub></sup>
+            </div>
+            <div class="formula-note">
+                σ(z) = 1 / (1 + e<sup>−z</sup>). This formula draws a soft coverage strip with length L, width W, and angle θ around the point (x<sub>0</sub>, y<sub>0</sub>).
+            </div>
+        </div>
+        <div class="formula-card">
+            <div class="formula-title">Hover the controls</div>
+            <div class="formula-note">
+                Tooltips are attached to each slider so the explanation appears only when you hover or focus the parameter.
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="main">
     <div class="canvas-container">
-        <canvas id="heatmap" width="600" height="600"></canvas>
+        <canvas id="heatmap" width="600" height="500"></canvas>
         <div class="legend">
             <div class="gradient-bar"></div>
             <div class="legend-labels">
@@ -132,36 +254,35 @@
     <div class="controls">
         <div class="control-group">
             <div class="group-title">Geometry and Orientation</div>
-            <div class="param-row"><label>x₀ (start)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label>y₀ (start)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0"><span class="param-val">2.0</span></div>
-            <div class="param-row"><label>θ (angle, rad)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6"><span class="param-val">0.60</span></div>
-            <div class="param-row"><label>L (vector length)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0"><span class="param-val">5.0</span></div>
-            <div class="param-row"><label>W (width of the area)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0"><span class="param-val">2.0</span></div>
+            <div class="param-row"><label title="Starting x-coordinate of the coverage strip">x₀ (start)</label><input type="range" id="x0" min="-2" max="10" step="0.5" value="2.0" title="Starting x-coordinate of the coverage strip"><span class="param-val">2.0</span></div>
+            <div class="param-row"><label title="Starting y-coordinate of the coverage strip">y₀ (start)</label><input type="range" id="y0" min="-2" max="8" step="0.5" value="2.0" title="Starting y-coordinate of the coverage strip"><span class="param-val">2.0</span></div>
+            <div class="param-row"><label title="Orientation angle in radians">θ (angle, rad)</label><input type="range" id="theta" min="0" max="6.28" step="0.05" value="0.6" title="Orientation angle in radians"><span class="param-val">0.60</span></div>
+            <div class="param-row"><label title="Length of the coverage segment">L (vector length)</label><input type="range" id="L" min="1" max="12" step="0.5" value="5.0" title="Length of the coverage segment"><span class="param-val">5.0</span></div>
+            <div class="param-row"><label title="Width of the coverage strip">W (width of the area)</label><input type="range" id="W" min="0.5" max="6" step="0.25" value="2.0" title="Width of the coverage strip"><span class="param-val">2.0</span></div>
         </div>
 
         <div class="control-group">
             <div class="group-title">Edge Sharpness (k)</div>
-            <div class="param-row"><label>k₁ (start)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₂ (end)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₃ (left)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
-            <div class="param-row"><label>k₄ (right)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label title="Sharpness coefficient for the start edge along the strip">k₁ (start)</label><input type="range" id="k1" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the start edge along the strip"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label title="Sharpness coefficient for the end edge along the strip">k₂ (end)</label><input type="range" id="k2" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the end edge along the strip"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label title="Sharpness coefficient for the left boundary">k₃ (left)</label><input type="range" id="k3" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the left boundary"><span class="param-val">3.0</span></div>
+            <div class="param-row"><label title="Sharpness coefficient for the right boundary">k₄ (right)</label><input type="range" id="k4" min="0.5" max="10" step="0.5" value="3.0" title="Sharpness coefficient for the right boundary"><span class="param-val">3.0</span></div>
         </div>
 
         <div class="control-group">
             <div class="group-title">Degrees of Distortion (p)</div>
-            <div class="param-row"><label>p₁ (start)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₂ (end)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₃ (left)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
-            <div class="param-row"><label>p₄ (right)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label title="Distortion exponent for the start edge">p₁ (start)</label><input type="range" id="p1" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the start edge"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label title="Distortion exponent for the end edge">p₂ (end)</label><input type="range" id="p2" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the end edge"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label title="Distortion exponent for the left boundary">p₃ (left)</label><input type="range" id="p3" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the left boundary"><span class="param-val">1.0</span></div>
+            <div class="param-row"><label title="Distortion exponent for the right boundary">p₄ (right)</label><input type="range" id="p4" min="0.2" max="5.0" step="0.1" value="1.0" title="Distortion exponent for the right boundary"><span class="param-val">1.0</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Configuration and constants
     const canvas = document.getElementById('heatmap');
     const ctx = canvas.getContext('2d');
-    const width = 600, height = 600;
+    const width = 600, height = 500;
     const res = 300;
 
     const xMin = -2, xMax = 10;
@@ -172,7 +293,6 @@
     const dx = worldW / res;
     const dy = worldH / res;
 
-    // Scale unification and centering
     const scale = Math.min(width / worldW, height / worldH);
     const offsetX = (width - worldW * scale) / 2;
     const offsetY = (height - worldH * scale) / 2;
@@ -191,7 +311,17 @@
         p1: 1.0, p2: 1.0, p3: 1.0, p4: 1.0
     };
 
-    // Mathematical model
+    const valueDecimals = {
+        x0: 1, y0: 1, theta: 2, L: 1, W: 1,
+        k1: 1, k2: 1, k3: 1, k4: 1,
+        p1: 1, p2: 1, p3: 1, p4: 1
+    };
+
+    function formatValue(id, value) {
+        const decimals = valueDecimals[id] ?? 1;
+        return Number(value).toFixed(decimals);
+    }
+
     function sigmoid(z) {
         z = Math.max(-500, Math.min(500, z));
         return 1.0 / (1.0 + Math.exp(-z));
@@ -226,7 +356,6 @@
         return { field, maxS };
     }
 
-    // Color gradient and LUT
     const gradientStops = [
         { t: 0.00, r: 0x40, g: 0x7b, b: 0xf1 },
         { t: 0.25, r: 0x64, g: 0xdb, b: 0xff },
@@ -259,7 +388,6 @@
     }
     buildLUT();
 
-    // Offscreen heatmap buffer
     const heatmapCanvas = document.createElement('canvas');
     heatmapCanvas.width = res;
     heatmapCanvas.height = res;
@@ -278,7 +406,6 @@
         heatmapCtx.putImageData(heatmapImage, 0, 0);
     }
 
-    // Contour drawing using marching squares
     function drawContourLevel(field, norm, level, strokeStyle, lineWidthPx) {
         ctx.save();
         setWorldTransform();
@@ -344,7 +471,6 @@
         ctx.restore();
     }
 
-    // Drawing
     function draw() {
         const { field, maxS } = computeField();
         const norm = maxS > 0 ? 1.0 / maxS : 1.0;
@@ -360,12 +486,10 @@
         ctx.drawImage(heatmapCanvas, xMin, yMin, worldW, worldH);
         ctx.restore();
 
-        // Contour levels
         drawContourLevel(field, norm, 0.2, 'rgba(20,20,30,0.28)', 0.8);
         drawContourLevel(field, norm, 0.5, 'rgba(20,20,30,0.40)', 1.0);
         drawContourLevel(field, norm, 0.8, 'rgba(20,20,30,0.55)', 1.15);
 
-        // Start point and orientation vector
         const startX = params.x0;
         const startY = params.y0;
         const endX = params.x0 + params.L * Math.cos(params.theta);
@@ -397,13 +521,10 @@
         ctx.stroke();
 
         const angle = Math.atan2(endY - startY, endX - startX);
-
         const backX = endX - arrowLen * Math.cos(angle);
         const backY = endY - arrowLen * Math.sin(angle);
-
         const leftX = backX + arrowHalfWidth * Math.sin(angle);
         const leftY = backY - arrowHalfWidth * Math.cos(angle);
-
         const rightX = backX - arrowHalfWidth * Math.sin(angle);
         const rightY = backY + arrowHalfWidth * Math.cos(angle);
 
@@ -412,23 +533,23 @@
         ctx.lineTo(leftX, leftY);
         ctx.lineTo(rightX, rightY);
         ctx.closePath();
-
         ctx.fillStyle = 'rgba(15,15,20,0.75)';
         ctx.fill();
 
         ctx.restore();
     }
 
-    // UI interactions
     const sliders = ['x0','y0','theta','L','W','k1','k2','k3','k4','p1','p2','p3','p4'];
     sliders.forEach(id => {
         const el = document.getElementById(id);
         const valEl = el.parentElement.querySelector('.param-val');
-        el.addEventListener('input', () => {
+        const syncValue = () => {
             params[id] = parseFloat(el.value);
-            valEl.textContent = parseFloat(el.value).toFixed(2).replace(/\.?0+$/, '');
+            valEl.textContent = formatValue(id, el.value);
             draw();
-        });
+        };
+        el.addEventListener('input', syncValue);
+        syncValue();
     });
 
     draw();
